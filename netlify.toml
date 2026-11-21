@@ -1,0 +1,6 @@
+# On Netlify, Nitro's `netlify` preset writes static assets to `dist/` and the
+# SSR server function to `.netlify/functions-internal/`. (`dist/client` is only
+# produced by the Cloudflare build used inside Lovable.)
+[build]
+  command = "bun run build"
+  publish = "dist"
