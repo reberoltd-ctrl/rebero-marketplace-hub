@@ -8,6 +8,13 @@
       "when": 1795287260155,
       "tag": "0000_rebero_foundation",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1795288891619,
+      "tag": "0001_tighten_settings_and_image_reads",
+      "breakpoints": true
     }
   ]
 }
