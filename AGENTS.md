@@ -28,3 +28,12 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Project rules (REBERO)
+- Roles live only in `public.user_roles` (enum `app_role`); privilege checks use `has_role`/`is_staff` SQL functions, never profile fields or client state — prevents privilege escalation.
+- Status/approval fields on shops, products and profiles are protected by BEFORE triggers (`*_guard`) that ignore non-staff changes; the app never trusts the browser for approvals.
+- Money is stored as whole RWF integers and commission rates as basis points in `platform_settings`; commission math lives in `src/lib/commission.ts` with tests — no floating-point money.
+- Storage buckets are private (workspace blocks public buckets); listing photos are served through `/api/public/media/<bucket>/<path>` so link previews get stable absolute URLs.
+- Product and shop pages load via public server functions in `src/lib/public.functions.ts` so SSR can emit real og:image/price meta for WhatsApp/Facebook shares.
+- Admin and seller areas live under `src/routes/_authenticated/`; admin pages render their own layout (no storefront header).
+- The Super Admin is created once via `/setup` (server fn `bootstrapSuperAdmin`) from the `SUPER_ADMIN_INITIAL_PASSWORD` secret and must change the password on first login.
