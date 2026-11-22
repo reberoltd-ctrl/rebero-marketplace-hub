@@ -10,9 +10,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SpotlightForm } from "@/components/spotlight/SpotlightForm";
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
 import { SPOTLIGHT_STATUS_BADGE, SPOTLIGHT_STATUS_LABEL, toLocalInput, type SpotlightStatus } from "@/lib/spotlight";
 
 export const Route = createFileRoute("/_authenticated/admin/spotlight")({ component: AdminSpotlight });
+
+type SpotlightPatch = Database["public"]["Tables"]["shop_spotlights"]["Update"];
 
 const fromLocal = (v: string) => (v ? new Date(v).toISOString() : null);
 
@@ -45,7 +48,7 @@ function AdminSpotlight() {
     void qc.invalidateQueries({ queryKey: ["live-spotlights"] });
   };
 
-  const update = async (id: string, patch: Record<string, unknown>, msg: string) => {
+  const update = async (id: string, patch: SpotlightPatch, msg: string) => {
     const { error } = await supabase.from("shop_spotlights").update(patch).eq("id", id);
     if (error) return void toast.error(error.message);
     toast.success(msg);
@@ -110,7 +113,7 @@ type Row = {
 
 function SpotlightRow({ s, onUpdate, onReject, onRemove }: {
   s: Row;
-  onUpdate: (id: string, patch: Record<string, unknown>, msg: string) => Promise<void>;
+  onUpdate: (id: string, patch: SpotlightPatch, msg: string) => Promise<void>;
   onReject: (id: string) => void;
   onRemove: (id: string) => void;
 }) {
