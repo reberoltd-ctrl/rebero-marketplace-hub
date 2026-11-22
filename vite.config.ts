@@ -15,4 +15,9 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  vite: {
+    // Pre-bundle the carousel library so the dev server never re-optimizes it mid-session
+    // (a late re-optimization loads two React copies and blanks the page).
+    optimizeDeps: { include: ["embla-carousel-react"] },
+  },
 });
