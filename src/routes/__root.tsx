@@ -90,7 +90,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "REBERO — Your Technology. Your Marketplace." },
       { name: "description", content: "Rwanda's electronics marketplace: new, refurbished and used tech from trusted Kigali shops, priced in RWF." },
       { name: "author", content: "REBERO Ltd" },
-      { name: "theme-color", content: "#1c2230" },
+      { name: "theme-color", content: "#111418" },
       { property: "og:site_name", content: "REBERO" },
       { property: "og:title", content: "REBERO — Your Technology. Your Marketplace." },
       { property: "og:description", content: "Rwanda's electronics marketplace: new, refurbished and used tech from trusted Kigali shops." },
@@ -102,7 +102,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/favicon.png", type: "image/png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
@@ -119,7 +119,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <head>
         <HeadContent />
       </head>
