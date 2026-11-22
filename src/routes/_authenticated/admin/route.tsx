@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
-import { FolderTree, LayoutDashboard, ListChecks, LogOut, Package, ScrollText, Settings, Store, Users } from "lucide-react";
+import { FolderTree, LayoutDashboard, ListChecks, LogOut, Megaphone, Package, ScrollText, Settings, Store, Users } from "lucide-react";
 import { Logo } from "@/components/site/Logo";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
@@ -13,6 +13,7 @@ const NAV = [
   { to: "/admin" as const, label: "Overview", icon: LayoutDashboard, exact: true },
   { to: "/admin/sellers" as const, label: "Sellers", icon: Store },
   { to: "/admin/products" as const, label: "Products", icon: Package },
+  { to: "/admin/spotlight" as const, label: "Homepage spotlight", icon: Megaphone },
   { to: "/admin/categories" as const, label: "Categories", icon: FolderTree },
   { to: "/admin/users" as const, label: "Users & roles", icon: Users },
   { to: "/admin/settings" as const, label: "Settings", icon: Settings },

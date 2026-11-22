@@ -31,8 +31,10 @@ import { Route as AuthenticatedAdminCategoriesRouteImport } from './routes/_auth
 import { Route as AuthenticatedAdminProductsRouteImport } from './routes/_authenticated/admin/products'
 import { Route as AuthenticatedAdminSellersRouteImport } from './routes/_authenticated/admin/sellers'
 import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin/settings'
+import { Route as AuthenticatedAdminSpotlightRouteImport } from './routes/_authenticated/admin/spotlight'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin/users'
 import { Route as AuthenticatedSellerIndexRouteImport } from './routes/_authenticated/seller/index'
+import { Route as AuthenticatedSellerSpotlightRouteImport } from './routes/_authenticated/seller/spotlight'
 import { Route as AuthenticatedSellerProductsIdRouteImport } from './routes/_authenticated/seller/products.$id'
 import { Route as AuthenticatedSellerProductsNewRouteImport } from './routes/_authenticated/seller/products.new'
 import { Route as ApiPublicMediaSplatRouteImport } from './routes/api/public/media.$'
@@ -151,6 +153,12 @@ const AuthenticatedAdminSettingsRoute =
     path: '/settings',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const AuthenticatedAdminSpotlightRoute =
+  AuthenticatedAdminSpotlightRouteImport.update({
+    id: '/spotlight',
+    path: '/spotlight',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
   id: '/users',
   path: '/users',
@@ -160,6 +168,12 @@ const AuthenticatedSellerIndexRoute =
   AuthenticatedSellerIndexRouteImport.update({
     id: '/seller/',
     path: '/seller/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedSellerSpotlightRoute =
+  AuthenticatedSellerSpotlightRouteImport.update({
+    id: '/seller/spotlight',
+    path: '/seller/spotlight',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedSellerProductsIdRoute =
@@ -201,7 +215,9 @@ export interface FileRoutesByFullPath {
   '/admin/products': typeof AuthenticatedAdminProductsRoute
   '/admin/sellers': typeof AuthenticatedAdminSellersRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
+  '/admin/spotlight': typeof AuthenticatedAdminSpotlightRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/seller/spotlight': typeof AuthenticatedSellerSpotlightRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/seller/': typeof AuthenticatedSellerIndexRoute
   '/seller/products/$id': typeof AuthenticatedSellerProductsIdRoute
@@ -228,7 +244,9 @@ export interface FileRoutesByTo {
   '/admin/products': typeof AuthenticatedAdminProductsRoute
   '/admin/sellers': typeof AuthenticatedAdminSellersRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
+  '/admin/spotlight': typeof AuthenticatedAdminSpotlightRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/seller/spotlight': typeof AuthenticatedSellerSpotlightRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/seller': typeof AuthenticatedSellerIndexRoute
   '/seller/products/$id': typeof AuthenticatedSellerProductsIdRoute
@@ -258,7 +276,9 @@ export interface FileRoutesById {
   '/_authenticated/admin/products': typeof AuthenticatedAdminProductsRoute
   '/_authenticated/admin/sellers': typeof AuthenticatedAdminSellersRoute
   '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRoute
+  '/_authenticated/admin/spotlight': typeof AuthenticatedAdminSpotlightRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/_authenticated/seller/spotlight': typeof AuthenticatedSellerSpotlightRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/seller/': typeof AuthenticatedSellerIndexRoute
   '/_authenticated/seller/products/$id': typeof AuthenticatedSellerProductsIdRoute
@@ -288,7 +308,9 @@ export interface FileRouteTypes {
     | '/admin/products'
     | '/admin/sellers'
     | '/admin/settings'
+    | '/admin/spotlight'
     | '/admin/users'
+    | '/seller/spotlight'
     | '/admin/'
     | '/seller/'
     | '/seller/products/$id'
@@ -315,7 +337,9 @@ export interface FileRouteTypes {
     | '/admin/products'
     | '/admin/sellers'
     | '/admin/settings'
+    | '/admin/spotlight'
     | '/admin/users'
+    | '/seller/spotlight'
     | '/admin'
     | '/seller'
     | '/seller/products/$id'
@@ -344,7 +368,9 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/products'
     | '/_authenticated/admin/sellers'
     | '/_authenticated/admin/settings'
+    | '/_authenticated/admin/spotlight'
     | '/_authenticated/admin/users'
+    | '/_authenticated/seller/spotlight'
     | '/_authenticated/admin/'
     | '/_authenticated/seller/'
     | '/_authenticated/seller/products/$id'
@@ -524,6 +550,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminSettingsRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/spotlight': {
+      id: '/_authenticated/admin/spotlight'
+      path: '/spotlight'
+      fullPath: '/admin/spotlight'
+      preLoaderRoute: typeof AuthenticatedAdminSpotlightRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
     '/_authenticated/admin/users': {
       id: '/_authenticated/admin/users'
       path: '/users'
@@ -536,6 +569,13 @@ declare module '@tanstack/react-router' {
       path: '/seller'
       fullPath: '/seller/'
       preLoaderRoute: typeof AuthenticatedSellerIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/seller/spotlight': {
+      id: '/_authenticated/seller/spotlight'
+      path: '/seller/spotlight'
+      fullPath: '/seller/spotlight'
+      preLoaderRoute: typeof AuthenticatedSellerSpotlightRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/seller/products/$id': {
@@ -568,6 +608,7 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminProductsRoute: typeof AuthenticatedAdminProductsRoute
   AuthenticatedAdminSellersRoute: typeof AuthenticatedAdminSellersRoute
   AuthenticatedAdminSettingsRoute: typeof AuthenticatedAdminSettingsRoute
+  AuthenticatedAdminSpotlightRoute: typeof AuthenticatedAdminSpotlightRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
@@ -579,6 +620,7 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
     AuthenticatedAdminProductsRoute: AuthenticatedAdminProductsRoute,
     AuthenticatedAdminSellersRoute: AuthenticatedAdminSellersRoute,
     AuthenticatedAdminSettingsRoute: AuthenticatedAdminSettingsRoute,
+    AuthenticatedAdminSpotlightRoute: AuthenticatedAdminSpotlightRoute,
     AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
     AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
   }
@@ -593,6 +635,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAccountRoute: typeof AuthenticatedAccountRoute
   AuthenticatedChangePasswordRoute: typeof AuthenticatedChangePasswordRoute
   AuthenticatedWishlistRoute: typeof AuthenticatedWishlistRoute
+  AuthenticatedSellerSpotlightRoute: typeof AuthenticatedSellerSpotlightRoute
   AuthenticatedSellerIndexRoute: typeof AuthenticatedSellerIndexRoute
   AuthenticatedSellerProductsIdRoute: typeof AuthenticatedSellerProductsIdRoute
   AuthenticatedSellerProductsNewRoute: typeof AuthenticatedSellerProductsNewRoute
@@ -603,6 +646,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAccountRoute: AuthenticatedAccountRoute,
   AuthenticatedChangePasswordRoute: AuthenticatedChangePasswordRoute,
   AuthenticatedWishlistRoute: AuthenticatedWishlistRoute,
+  AuthenticatedSellerSpotlightRoute: AuthenticatedSellerSpotlightRoute,
   AuthenticatedSellerIndexRoute: AuthenticatedSellerIndexRoute,
   AuthenticatedSellerProductsIdRoute: AuthenticatedSellerProductsIdRoute,
   AuthenticatedSellerProductsNewRoute: AuthenticatedSellerProductsNewRoute,

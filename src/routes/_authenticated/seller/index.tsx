@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Clock, Eye, Package, PackageCheck, Pencil, Plus, Store, Trash2, XCircle } from "lucide-react";
+import { Clock, Eye, Megaphone, Package, PackageCheck, Pencil, Plus, Store, Trash2, XCircle } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -172,7 +172,10 @@ function Dashboard({ shopId, shopName, shopSlug }: { shopId: string; shopName: s
           <h1 className="text-2xl font-bold md:text-3xl">{shopName}</h1>
           <Link to="/shop/$slug" params={{ slug: shopSlug }} className="text-sm text-primary hover:underline">View public shop page</Link>
         </div>
-        <Button asChild><Link to="/seller/products/new"><Plus /> Add product</Link></Button>
+        <div className="flex flex-wrap gap-2">
+          <Button asChild variant="outline"><Link to="/seller/spotlight"><Megaphone /> Promote on homepage</Link></Button>
+          <Button asChild><Link to="/seller/products/new"><Plus /> Add product</Link></Button>
+        </div>
       </div>
 
       <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">

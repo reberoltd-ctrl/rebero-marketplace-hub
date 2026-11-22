@@ -15,6 +15,13 @@
       "when": 1795288891619,
       "tag": "0001_tighten_settings_and_image_reads",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1795331185897,
+      "tag": "0002_shop_spotlights",
+      "breakpoints": true
     }
   ]
 }

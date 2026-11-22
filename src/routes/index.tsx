@@ -13,7 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { categoriesQuery, fetchProducts, type CardProduct } from "@/lib/catalog";
 import { useRecentlyViewed } from "@/lib/recent";
 import type { SearchParams } from "@/lib/search-params";
-import heroAsset from "@/assets/rebero-hero.jpg.asset.json";
+import { HomeSpotlight } from "@/components/spotlight/HomeSpotlight";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -85,28 +85,8 @@ function Home() {
 
   return (
     <div className="pb-4">
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-ink text-ink-foreground">
-        <img src={heroAsset.url} alt="" className="absolute inset-0 size-full object-cover object-right" />
-        <div className="absolute inset-0 hero-scrim" />
-        <div className="container-page relative py-16 md:py-24">
-          <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-primary">Kigali's electronics marketplace</p>
-          <h1 className="max-w-xl text-4xl font-extrabold leading-[1.05] md:text-5xl">Your Technology.<br />Your Marketplace.</h1>
-          <p className="mt-4 max-w-md text-ink-muted">New, refurbished and used electronics from trusted shops across Gasabo, Kicukiro and Nyarugenge — all priced in RWF.</p>
-          <form onSubmit={submit} className="mt-8 flex max-w-lg gap-2" role="search">
-            <div className="relative flex-1">
-              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="What are you looking for?" aria-label="Search products" className="h-12 rounded-lg border-0 bg-card pl-9 text-foreground" />
-            </div>
-            <Button type="submit" size="lg" className="h-12">Search</Button>
-          </form>
-          <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-ink-muted">
-            <span className="flex items-center gap-2"><ShieldCheck className="size-4 text-primary" /> Every condition clearly labelled</span>
-            <span className="flex items-center gap-2"><BadgeCheck className="size-4 text-primary" /> Sellers reviewed before listing</span>
-            <span className="flex items-center gap-2"><Truck className="size-4 text-primary" /> Delivery arranged by the seller</span>
-          </div>
-        </div>
-      </section>
+      {/* Homepage spotlight: shop slides approved by admins */}
+      <HomeSpotlight />
 
       {/* Categories: slideshow showing 3 at a time */}
       {categories.length > 0 && (
