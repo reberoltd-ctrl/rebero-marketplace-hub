@@ -1,0 +1,19 @@
+{
+  "name": "REBERO",
+  "short_name": "REBERO",
+  "description": "Rwanda's electronics marketplace: new, refurbished and used tech from trusted Kigali shops, priced in RWF.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#111418",
+  "theme_color": "#111418",
+  "lang": "en",
+  "categories": ["shopping"],
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
