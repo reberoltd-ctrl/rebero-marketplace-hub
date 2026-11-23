@@ -9,6 +9,7 @@
 - [x] Labelled sample products under a "REBERO Demo" shop (user asked)
 - [x] Wishlist, customer account page
 - [x] Seller application + seller dashboard (products with image upload, pending approval)
+- [x] Homepage spotlight slideshow: seller requests, admin approval & scheduling (tested end-to-end)
 - [x] Super Admin: overview from real data, approve sellers/products, categories, users & roles
 
 ## Later stages

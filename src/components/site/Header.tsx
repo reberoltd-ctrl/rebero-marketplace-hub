@@ -1,6 +1,6 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Globe, Heart, LayoutDashboard, LogOut, Menu, Search, ShieldCheck, ShoppingCart, Store, User } from "lucide-react";
+import { Globe, Heart, LogOut, Menu, Search, ShieldCheck, ShoppingCart, Store, User } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,7 +59,6 @@ export function Header() {
                 </Link>
               ))}
               <div className="my-2 border-t" />
-              <Link to="/sell" onClick={() => setOpen(false)} className="rounded-md px-2 py-2 text-sm font-medium hover:bg-muted">Sell on REBERO</Link>
               <Link to="/affiliate" onClick={() => setOpen(false)} className="rounded-md px-2 py-2 text-sm font-medium hover:bg-muted">Become an affiliate</Link>
             </nav>
           </SheetContent>
@@ -138,9 +137,6 @@ export function Header() {
             </Link>
           ))}
           <Link to="/search" className="whitespace-nowrap hover:text-ink-foreground">All products</Link>
-          <Link to="/sell" className="ml-auto flex items-center gap-1 whitespace-nowrap font-medium text-primary hover:text-primary-hover">
-            <LayoutDashboard className="size-4" /> Sell on REBERO
-          </Link>
         </div>
       </nav>
     </header>

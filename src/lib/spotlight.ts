@@ -38,14 +38,14 @@ export const liveSpotlightsQuery = queryOptions({
 const ALLOWED = ["image/jpeg", "image/png", "image/webp"];
 
 /** Uploads a spotlight photo into the signed-in user's folder and returns its public media URL. */
-export async function uploadSpotlightImage(file: File, userId: string): Promise<{ url: string; storage_path: string }> {
+export async function uploadSpotlightImage(file: File, userId: string): Promise<{ image_url: string; storage_path: string }> {
   if (!ALLOWED.includes(file.type)) throw new Error("Use a JPG, PNG or WebP photo.");
   if (file.size > 5 * 1024 * 1024) throw new Error("The photo must be 5 MB or smaller.");
   const ext = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
   const path = `${userId}/spotlight/${crypto.randomUUID()}.${ext}`;
   const { error } = await supabase.storage.from("shop-media").upload(path, file, { contentType: file.type });
   if (error) throw new Error("Could not upload the photo. Please try again.");
-  return { url: `/api/public/media/shop-media/${path}`, storage_path: path };
+  return { image_url: `/api/public/media/shop-media/${path}`, storage_path: path };
 }
 
 /** Converts a stored timestamp to the value a datetime-local input expects (local time). */

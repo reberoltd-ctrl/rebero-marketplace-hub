@@ -88,7 +88,7 @@ function Home() {
       {/* Homepage spotlight: shop slides approved by admins */}
       <HomeSpotlight />
 
-      {/* Categories: slideshow showing 3 at a time */}
+      {/* Categories: slideshow showing 2 at a time on phones, 3 on larger screens */}
       {categories.length > 0 && (
         <Section title="Popular categories" to="/search">
           <CategorySlideshow categories={categories} />
@@ -163,7 +163,7 @@ function Home() {
 
 type CategoryTile = { id: string; slug: string; name: string; icon: string | null };
 
-/** Shows three categories at a time and slides to the next ones every few seconds. */
+/** Shows two categories at a time on phones and three on larger screens, and slides to the next ones every few seconds. */
 function CategorySlideshow({ categories }: { categories: CategoryTile[] }) {
   const [api, setApi] = useState<CarouselApi>();
   const [paused, setPaused] = useState(false);
@@ -178,11 +178,11 @@ function CategorySlideshow({ categories }: { categories: CategoryTile[] }) {
   }, [api, paused]);
 
   return (
-    <Carousel setApi={setApi} opts={{ align: "start", loop: true, slidesToScroll: 3 }} className="px-10"
+    <Carousel setApi={setApi} opts={{ align: "start", loop: true, slidesToScroll: 2, breakpoints: { "(min-width: 768px)": { slidesToScroll: 3 } } }} className="px-10"
       onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
       <CarouselContent>
         {categories.map((c) => (
-          <CarouselItem key={c.id} className="basis-1/3">
+          <CarouselItem key={c.id} className="basis-1/2 md:basis-1/3">
             <Link to="/category/$slug" params={{ slug: c.slug }}
               className="group flex h-full flex-col items-center gap-3 rounded-xl border bg-card p-5 text-center text-sm font-medium transition-colors hover:border-primary">
               <span className="grid size-14 place-items-center rounded-full bg-accent text-accent-foreground transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
