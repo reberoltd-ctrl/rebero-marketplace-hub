@@ -10,6 +10,7 @@
 - [x] Wishlist, customer account page
 - [x] Seller application + seller dashboard (products with image upload, pending approval)
 - [x] Homepage spotlight slideshow: seller requests, admin approval & scheduling (tested end-to-end)
+- [x] Cloudinary for all photos (existing ones copied over, new uploads direct, optimised delivery)
 - [x] Super Admin: overview from real data, approve sellers/products, categories, users & roles
 
 ## Later stages

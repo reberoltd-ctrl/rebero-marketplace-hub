@@ -132,6 +132,7 @@ export type Database = {
       }
       product_images: {
         Row: {
+          cloudinary_public_id: string | null
           created_at: string
           id: string
           product_id: string
@@ -140,6 +141,7 @@ export type Database = {
           url: string
         }
         Insert: {
+          cloudinary_public_id?: string | null
           created_at?: string
           id?: string
           product_id: string
@@ -148,6 +150,7 @@ export type Database = {
           url: string
         }
         Update: {
+          cloudinary_public_id?: string | null
           created_at?: string
           id?: string
           product_id?: string
@@ -325,6 +328,7 @@ export type Database = {
       }
       shop_spotlights: {
         Row: {
+          cloudinary_public_id: string | null
           created_at: string
           description: string | null
           ends_at: string | null
@@ -341,6 +345,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          cloudinary_public_id?: string | null
           created_at?: string
           description?: string | null
           ends_at?: string | null
@@ -357,6 +362,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          cloudinary_public_id?: string | null
           created_at?: string
           description?: string | null
           ends_at?: string | null

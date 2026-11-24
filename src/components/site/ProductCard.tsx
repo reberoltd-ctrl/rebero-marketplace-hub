@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ShareButtons } from "@/components/site/ShareButtons";
 import { cart } from "@/lib/cart";
 import { firstImage, type CardProduct } from "@/lib/catalog";
+import { cldSrcSet, cldUrl } from "@/lib/cloudinary";
 import { CONDITION_LABEL, discountPercent, formatRwf } from "@/lib/format";
 import { useWishlist } from "@/lib/wishlist";
 import { cn } from "@/lib/utils";
@@ -32,7 +33,7 @@ export function ProductCard({ product }: { product: CardProduct }) {
     <article className="group relative flex flex-col overflow-hidden rounded-xl border bg-card shadow-card transition-shadow hover:shadow-lift">
       <Link to="/product/$slug" params={{ slug: product.slug }} className="relative block aspect-square overflow-hidden bg-muted">
         {img ? (
-          <img src={img} alt={product.name} loading="lazy" className="size-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
+          <img src={cldUrl(img, { width: 480, aspectRatio: "1:1" })} srcSet={cldSrcSet(img, [240, 360, 480, 720], { aspectRatio: "1:1" })} sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw" alt={product.name} loading="lazy" decoding="async" className="size-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
         ) : (
           <div className="grid size-full place-items-center text-sm text-muted-foreground">No photo</div>
         )}

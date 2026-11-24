@@ -10,6 +10,7 @@ import { ShareButtons } from "@/components/site/ShareButtons";
 import { supabase } from "@/integrations/supabase/client";
 import { cart } from "@/lib/cart";
 import { fetchProducts } from "@/lib/catalog";
+import { cldSrcSet, cldUrl } from "@/lib/cloudinary";
 import { absoluteUrl, CONDITION_LABEL, discountPercent, formatRwf } from "@/lib/format";
 import { getProductPage } from "@/lib/public.functions";
 import { pushRecentlyViewed, storeReferral } from "@/lib/recent";
@@ -28,7 +29,7 @@ export const Route = createFileRoute("/product/$slug")({
     const p = loaderData?.product;
     if (!p) return { meta: [{ title: "Product not found — REBERO" }] };
     const imgs = [...(p.images ?? [])].sort((a, b) => a.sort_order - b.sort_order);
-    const img = imgs[0] ? absoluteUrl(imgs[0].url, loaderData.origin) : null;
+    const img = imgs[0] ? absoluteUrl(cldUrl(imgs[0].url, { width: 1200, height: 630, crop: "fill", format: "jpg" }), loaderData.origin) : null;
     const title = `${p.name} — ${formatRwf(p.price_rwf)} | REBERO`;
     const desc = `${CONDITION_LABEL[p.condition]} · ${formatRwf(p.price_rwf)} · Sold by ${p.shop.name} on REBERO, Kigali.`;
     const url = loaderData.origin ? `${loaderData.origin}/product/${p.slug}` : undefined;
@@ -111,14 +112,14 @@ function ProductPage() {
       <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
         <div>
           <div className="aspect-square overflow-hidden rounded-2xl border bg-muted">
-            {images[active] ? <img src={images[active].url} alt={product.name} className="size-full object-cover" /> : <div className="grid size-full place-items-center text-muted-foreground"><Package className="size-10" /></div>}
+            {images[active] ? <img src={cldUrl(images[active].url, { width: 900, aspectRatio: "1:1" })} srcSet={cldSrcSet(images[active].url, [480, 720, 900, 1200], { aspectRatio: "1:1" })} sizes="(min-width: 1024px) 50vw, 100vw" alt={product.name} className="size-full object-cover" /> : <div className="grid size-full place-items-center text-muted-foreground"><Package className="size-10" /></div>}
           </div>
           {images.length > 1 && (
             <div className="mt-3 flex gap-2 overflow-x-auto">
               {images.map((im, i) => (
                 <button key={im.url + i} type="button" onClick={() => setActive(i)} aria-label={`Photo ${i + 1}`}
                   className={cn("size-20 shrink-0 overflow-hidden rounded-lg border-2", i === active ? "border-primary" : "border-transparent")}>
-                  <img src={im.url} alt="" className="size-full object-cover" />
+                  <img src={cldUrl(im.url, { width: 160, aspectRatio: "1:1" })} alt="" loading="lazy" className="size-full object-cover" />
                 </button>
               ))}
             </div>

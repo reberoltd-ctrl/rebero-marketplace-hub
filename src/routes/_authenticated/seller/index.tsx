@@ -1,3 +1,4 @@
+import { cldUrl } from "@/lib/cloudinary";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Clock, Eye, Megaphone, Package, PackageCheck, Pencil, Plus, Store, Trash2, XCircle } from "lucide-react";
@@ -202,7 +203,7 @@ function Dashboard({ shopId, shopName, shopSlug }: { shopId: string; shopName: s
               const img = [...p.images].sort((a, b) => a.sort_order - b.sort_order)[0]?.url;
               return (
                 <li key={p.id} className="flex items-center gap-4 p-4">
-                  <div className="size-14 shrink-0 overflow-hidden rounded-lg bg-muted">{img && <img src={img} alt="" className="size-full object-cover" />}</div>
+                  <div className="size-14 shrink-0 overflow-hidden rounded-lg bg-muted">{img && <img src={cldUrl(img, { width: 112, aspectRatio: "1:1" })} alt="" loading="lazy" className="size-full object-cover" />}</div>
                   <div className="min-w-0 flex-1">
                     <div className="truncate font-medium">{p.name}</div>
                     <div className="text-xs text-muted-foreground">{CONDITION_LABEL[p.condition]} · {formatRwf(p.price_rwf)} · {p.stock} in stock</div>

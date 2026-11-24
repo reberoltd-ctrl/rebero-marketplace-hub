@@ -7,7 +7,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { useAuth } from "@/lib/auth";
 import { liveSpotlightsQuery } from "@/lib/spotlight";
 import { cn } from "@/lib/utils";
-import heroAsset from "@/assets/rebero-hero.jpg.asset.json";
+import { BRAND_MEDIA, cldSrcSet, cldUrl } from "@/lib/cloudinary";
 
 const SLIDE = "relative h-[340px] overflow-hidden bg-ink text-ink-foreground md:h-[440px]";
 
@@ -38,7 +38,7 @@ export function HomeSpotlight() {
   if (slides.length === 0) {
     return (
       <section className={SLIDE}>
-        <img src={heroAsset.url} alt="" className="absolute inset-0 size-full object-cover object-right opacity-70" />
+        <img src={cldUrl(BRAND_MEDIA.hero, { width: 1600 })} srcSet={cldSrcSet(BRAND_MEDIA.hero, [640, 1024, 1600, 2400])} sizes="100vw" alt="" className="absolute inset-0 size-full object-cover object-right opacity-70" />
         <div className="absolute inset-0 hero-scrim" />
         <div className="container-page relative flex h-full flex-col justify-center">
           <span className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-primary"><Megaphone className="size-4" /> Homepage spotlight</span>
@@ -57,7 +57,7 @@ export function HomeSpotlight() {
           {slides.map((s, i) => (
             <CarouselItem key={s.id} className="pl-0">
               <div className={SLIDE}>
-                <img src={s.image_url} alt={s.title} loading={i === 0 ? "eager" : "lazy"} className="absolute inset-0 size-full object-cover" />
+                <img src={cldUrl(s.image_url, { width: 1600 })} srcSet={cldSrcSet(s.image_url, [640, 1024, 1600, 2400])} sizes="100vw" alt={s.title} loading={i === 0 ? "eager" : "lazy"} decoding="async" className="absolute inset-0 size-full object-cover" />
                 <div className="absolute inset-0 hero-scrim" />
                 <div className="container-page relative flex h-full flex-col justify-center">
                   <span className="text-xs font-semibold uppercase tracking-widest text-primary">Featured shop · {s.shop.name}</span>

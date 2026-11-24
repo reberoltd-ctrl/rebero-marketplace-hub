@@ -15,7 +15,7 @@ function EditProduct() {
   const { data, isLoading } = useQuery({
     queryKey: ["edit-product", id],
     queryFn: async () => {
-      const { data, error } = await supabase.from("products").select("*, images:product_images(id, url, storage_path, sort_order)").eq("id", id).maybeSingle();
+      const { data, error } = await supabase.from("products").select("*, images:product_images(id, url, cloudinary_public_id, sort_order)").eq("id", id).maybeSingle();
       if (error) throw error;
       return data;
     },
@@ -29,7 +29,7 @@ function EditProduct() {
     compare_at_price_rwf: data.compare_at_price_rwf ? String(data.compare_at_price_rwf) : "", stock: String(data.stock),
     warranty: data.warranty ?? "",
     specs: Object.entries((data.specs ?? {}) as Record<string, string>).map(([key, value]) => ({ key, value: String(value) })).concat([{ key: "", value: "" }]),
-    images: [...data.images].sort((a, b) => a.sort_order - b.sort_order).map((i) => ({ id: i.id, url: i.url, storage_path: i.storage_path })),
+    images: [...data.images].sort((a, b) => a.sort_order - b.sort_order).map((i) => ({ id: i.id, url: i.url, cloudinary_public_id: i.cloudinary_public_id })),
   };
   return (
     <div className="container-page max-w-4xl py-8">

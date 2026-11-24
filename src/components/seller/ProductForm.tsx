@@ -8,8 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/lib/auth";
 import { categoriesQuery } from "@/lib/catalog";
+import { cldUrl, uploadToCloudinary } from "@/lib/cloudinary";
 import { CONDITION_LABEL, uniqueSlug, type ProductCondition } from "@/lib/format";
 
 export type ProductFormValues = {
@@ -25,7 +25,7 @@ export type ProductFormValues = {
   stock: string;
   warranty: string;
   specs: { key: string; value: string }[];
-  images: { id?: string; url: string; storage_path: string | null }[];
+  images: { id?: string; url: string; cloudinary_public_id: string | null }[];
 };
 
 export const emptyProduct: ProductFormValues = {
@@ -34,32 +34,34 @@ export const emptyProduct: ProductFormValues = {
 };
 
 const MAX_IMAGES = 8;
-const ALLOWED = ["image/jpeg", "image/png", "image/webp"];
 
 export function ProductForm({ shopId, initial, onSaved }: { shopId: string; initial: ProductFormValues; onSaved: () => void }) {
-  const { user } = useAuth();
   const { data: categories = [] } = useQuery(categoriesQuery);
   const [v, setV] = useState<ProductFormValues>(initial);
   const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState<{ done: number; total: number; percent: number } | null>(null);
   const [saving, setSaving] = useState(false);
   const [removed, setRemoved] = useState<string[]>([]);
   const set = <K extends keyof ProductFormValues>(k: K, val: ProductFormValues[K]) => setV((p) => ({ ...p, [k]: val }));
 
   const upload = async (files: FileList | null) => {
-    if (!files || !user) return;
+    if (!files) return;
     const list = Array.from(files).slice(0, MAX_IMAGES - v.images.length);
+    if (!list.length) return;
     setUploading(true);
-    const added: ProductFormValues["images"] = [];
-    for (const f of list) {
-      if (!ALLOWED.includes(f.type)) { toast.error(`${f.name}: use JPG, PNG or WebP`); continue; }
-      if (f.size > 5 * 1024 * 1024) { toast.error(`${f.name} is larger than 5 MB`); continue; }
-      const ext = f.type === "image/png" ? "png" : f.type === "image/webp" ? "webp" : "jpg";
-      const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
-      const { error } = await supabase.storage.from("product-images").upload(path, f, { contentType: f.type });
-      if (error) { toast.error(`Could not upload ${f.name}`); continue; }
-      added.push({ url: `/api/public/media/product-images/${path}`, storage_path: path });
+    for (const [i, f] of list.entries()) {
+      setProgress({ done: i, total: list.length, percent: 0 });
+      try {
+        const res = await uploadToCloudinary(f, {
+          folder: "rebero/products",
+          onProgress: (percent) => setProgress({ done: i, total: list.length, percent }),
+        });
+        setV((p) => ({ ...p, images: [...p.images, { url: res.secure_url, cloudinary_public_id: res.public_id }] }));
+      } catch (err) {
+        toast.error(`${f.name}: ${err instanceof Error ? err.message : "could not upload"}`);
+      }
     }
-    setV((p) => ({ ...p, images: [...p.images, ...added] }));
+    setProgress(null);
     setUploading(false);
   };
 
@@ -102,7 +104,7 @@ export function ProductForm({ shopId, initial, onSaved }: { shopId: string; init
     for (const [idx, img] of keep.entries()) await supabase.from("product_images").update({ sort_order: idx }).eq("id", img.id!);
     const fresh = v.images.map((img, idx) => ({ img, idx })).filter((x) => !x.img.id);
     if (fresh.length) {
-      const { error } = await supabase.from("product_images").insert(fresh.map(({ img, idx }) => ({ product_id: productId!, url: img.url, storage_path: img.storage_path, sort_order: idx })));
+      const { error } = await supabase.from("product_images").insert(fresh.map(({ img, idx }) => ({ product_id: productId!, url: img.url, cloudinary_public_id: img.cloudinary_public_id, sort_order: idx })));
       if (error) { setSaving(false); return void toast.error("Product saved, but some photos could not be attached."); }
     }
     setSaving(false);
@@ -117,15 +119,21 @@ export function ProductForm({ shopId, initial, onSaved }: { shopId: string; init
         <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6">
           {v.images.map((img, i) => (
             <div key={img.url} className="relative aspect-square overflow-hidden rounded-lg border bg-muted">
-              <img src={img.url} alt="" className="size-full object-cover" />
+              <img src={cldUrl(img.url, { width: 240, aspectRatio: "1:1" })} alt="" className="size-full object-cover" />
               {i === 0 && <span className="absolute bottom-1 left-1 rounded bg-ink px-1.5 text-[10px] text-ink-foreground">Cover</span>}
               <button type="button" onClick={() => removeImage(i)} className="absolute right-1 top-1 grid size-6 place-items-center rounded-full bg-card shadow" aria-label="Remove photo"><X className="size-3.5" /></button>
             </div>
           ))}
           {v.images.length < MAX_IMAGES && (
             <label className="grid aspect-square cursor-pointer place-items-center rounded-lg border-2 border-dashed text-muted-foreground hover:border-primary hover:text-primary">
-              {uploading ? <Loader2 className="size-6 animate-spin" /> : <ImagePlus className="size-6" />}
-              <input type="file" accept="image/jpeg,image/png,image/webp" multiple className="sr-only" onChange={(e) => void upload(e.target.files)} disabled={uploading} />
+              {uploading && progress ? (
+                <span className="flex flex-col items-center gap-1 text-xs">
+                  <Loader2 className="size-5 animate-spin" />
+                  {progress.total > 1 ? `${progress.done + 1}/${progress.total} · ` : ""}{progress.percent}%
+                  <span className="h-1 w-12 overflow-hidden rounded-full bg-muted"><span className="block h-full bg-primary transition-all" style={{ width: `${progress.percent}%` }} /></span>
+                </span>
+              ) : <ImagePlus className="size-6" />}
+              <input type="file" accept="image/jpeg,image/png,image/webp" multiple className="sr-only" onChange={(e) => { void upload(e.target.files); e.target.value = ""; }} disabled={uploading} />
             </label>
           )}
         </div>

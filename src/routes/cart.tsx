@@ -1,3 +1,4 @@
+import { cldUrl } from "@/lib/cloudinary";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Minus, Plus, ShoppingCart, Store, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -47,7 +48,7 @@ function CartPage() {
                 {g.items.map((i) => (
                   <li key={i.productId} className="flex gap-4 p-4">
                     <Link to="/product/$slug" params={{ slug: i.slug }} className="size-20 shrink-0 overflow-hidden rounded-lg bg-muted">
-                      {i.image && <img src={i.image} alt="" className="size-full object-cover" />}
+                      {i.image && <img src={cldUrl(i.image, { width: 160, aspectRatio: "1:1" })} alt="" loading="lazy" className="size-full object-cover" />}
                     </Link>
                     <div className="flex min-w-0 flex-1 flex-col gap-2">
                       <Link to="/product/$slug" params={{ slug: i.slug }} className="line-clamp-2 text-sm font-medium hover:text-primary">{i.name}</Link>

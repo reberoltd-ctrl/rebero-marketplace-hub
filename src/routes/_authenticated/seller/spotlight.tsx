@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SpotlightForm } from "@/components/spotlight/SpotlightForm";
 import { supabase } from "@/integrations/supabase/client";
+import { cldUrl } from "@/lib/cloudinary";
 import { useMyShop } from "@/lib/seller";
 import { SPOTLIGHT_STATUS_BADGE, SPOTLIGHT_STATUS_LABEL } from "@/lib/spotlight";
 
@@ -73,7 +74,7 @@ function SellerSpotlight() {
           <ul className="divide-y">
             {requests.map((r) => (
               <li key={r.id} className="flex items-center gap-4 p-4">
-                <img src={r.image_url} alt="" className="aspect-[8/3] w-32 shrink-0 rounded-md object-cover" />
+                <img src={cldUrl(r.image_url, { width: 256, aspectRatio: "8:3" })} alt="" loading="lazy" className="aspect-[8/3] w-32 shrink-0 rounded-md object-cover" />
                 <div className="min-w-0 flex-1">
                   <div className="truncate font-medium">{r.title}</div>
                   {r.status === "approved" && (r.starts_at || r.ends_at) && (

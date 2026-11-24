@@ -33,7 +33,7 @@ use the editor.
 - Roles live only in `public.user_roles` (enum `app_role`); privilege checks use `has_role`/`is_staff` SQL functions, never profile fields or client state — prevents privilege escalation.
 - Status/approval fields on shops, products and profiles are protected by BEFORE triggers (`*_guard`) that ignore non-staff changes; the app never trusts the browser for approvals.
 - Money is stored as whole RWF integers and commission rates as basis points in `platform_settings`; commission math lives in `src/lib/commission.ts` with tests — no floating-point money.
-- Storage buckets are private (workspace blocks public buckets); listing photos are served through `/api/public/media/<bucket>/<path>` so link previews get stable absolute URLs.
+- All site media (listing/spotlight photos, logo, homepage art) lives in Cloudinary: browser uploads go direct via the unsigned preset in `src/lib/cloudinary.ts` (no API secret in code), rows store the URL plus `cloudinary_public_id`, and every `<img>` goes through `cldUrl`/`cldSrcSet` for f_auto/q_auto/resizing. Favicon and PWA icons stay in `public/` because browsers need same-origin icons. The old `/api/public/media` route stays only so legacy links keep working.
 - Product and shop pages load via public server functions in `src/lib/public.functions.ts` so SSR can emit real og:image/price meta for WhatsApp/Facebook shares.
 - Admin and seller areas live under `src/routes/_authenticated/`; admin pages render their own layout (no storefront header).
 - The Super Admin is created once via `/setup` (server fn `bootstrapSuperAdmin`) from the `SUPER_ADMIN_INITIAL_PASSWORD` secret and must change the password on first login.

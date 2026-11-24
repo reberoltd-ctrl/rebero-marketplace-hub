@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SpotlightForm } from "@/components/spotlight/SpotlightForm";
+import { cldUrl } from "@/lib/cloudinary";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { SPOTLIGHT_STATUS_BADGE, SPOTLIGHT_STATUS_LABEL, toLocalInput, type SpotlightStatus } from "@/lib/spotlight";
@@ -130,7 +131,7 @@ function SpotlightRow({ s, onUpdate, onReject, onRemove }: {
   return (
     <div className="rounded-xl border bg-card p-4">
       <div className="flex flex-col gap-4 md:flex-row">
-        <img src={s.image_url} alt="" className="aspect-[8/3] w-full shrink-0 rounded-lg object-cover md:w-64" />
+        <img src={cldUrl(s.image_url, { width: 512, aspectRatio: "8:3" })} alt="" loading="lazy" className="aspect-[8/3] w-full shrink-0 rounded-lg object-cover md:w-64" />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2 font-semibold">{s.title} <Badge variant={SPOTLIGHT_STATUS_BADGE[s.status]}>{SPOTLIGHT_STATUS_LABEL[s.status]}</Badge></div>
           <div className="text-sm text-muted-foreground">{s.shop?.name ?? "Unknown shop"}{s.shop && s.shop.status !== "approved" ? " · shop not approved, slide hidden" : ""}</div>

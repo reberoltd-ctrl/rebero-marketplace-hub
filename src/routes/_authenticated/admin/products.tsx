@@ -1,3 +1,4 @@
+import { cldUrl } from "@/lib/cloudinary";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Star } from "lucide-react";
@@ -61,7 +62,7 @@ function Products() {
               const img = [...p.images].sort((a, b) => a.sort_order - b.sort_order)[0]?.url;
               return (
                 <li key={p.id} className="flex flex-wrap items-center gap-4 p-4">
-                  <div className="size-14 shrink-0 overflow-hidden rounded-lg bg-muted">{img && <img src={img} alt="" className="size-full object-cover" />}</div>
+                  <div className="size-14 shrink-0 overflow-hidden rounded-lg bg-muted">{img && <img src={cldUrl(img, { width: 112, aspectRatio: "1:1" })} alt="" loading="lazy" className="size-full object-cover" />}</div>
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2 font-medium">
                       {p.status === "approved" ? <Link to="/product/$slug" params={{ slug: p.slug }} className="hover:text-primary">{p.name}</Link> : p.name}
