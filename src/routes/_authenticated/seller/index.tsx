@@ -15,6 +15,7 @@ import { useAuth } from "@/lib/auth";
 import { districtsQuery } from "@/lib/catalog";
 import { CONDITION_LABEL, formatRwf, isValidRwandaPhone, uniqueSlug } from "@/lib/format";
 import { useMyShop } from "@/lib/seller";
+import { ShopBranding } from "@/components/seller/ShopBranding";
 
 export const Route = createFileRoute("/_authenticated/seller/")({
   head: () => ({ meta: [{ title: "Seller dashboard — REBERO" }, { name: "robots", content: "noindex" }] }),
@@ -26,7 +27,7 @@ function SellerHome() {
   if (isLoading) return <div className="container-page py-16 text-sm text-muted-foreground">Loading your shop…</div>;
   if (!shop) return <ApplyForm />;
   if (shop.status !== "approved") return <ApplicationStatus shop={shop} />;
-  return <Dashboard shopId={shop.id} shopName={shop.name} shopSlug={shop.slug} />;
+  return (<><div className="container-page pt-8"><ShopBranding shopId={shop.id} name={shop.name} logoUrl={shop.logo_url} coverUrl={shop.cover_url} /></div><Dashboard shopId={shop.id} shopName={shop.name} shopSlug={shop.slug} /></>);
 }
 
 function ApplyForm({ resubmit }: { resubmit?: { id: string } }) {

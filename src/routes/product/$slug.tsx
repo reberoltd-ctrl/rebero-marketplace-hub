@@ -1,4 +1,5 @@
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
+import { RetryError } from "@/components/site/RetryError";
 import { useQuery } from "@tanstack/react-query";
 import { BadgeCheck, Heart, MapPin, Package, ShieldCheck, ShoppingCart, Truck, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -21,7 +22,9 @@ export const Route = createFileRoute("/product/$slug")({
   validateSearch: (raw: Record<string, unknown>): { ref?: string } =>
     typeof raw["ref"] === "string" && /^[0-9a-f-]{36}$/i.test(raw["ref"]) ? { ref: raw["ref"] } : {},
   loader: async ({ params }) => {
-    const res = await getProductPage({ data: { slug: params.slug } });
+    let res;
+    try { res = await getProductPage({ data: { slug: params.slug } }); }
+    catch { res = await getProductPage({ data: { slug: params.slug } }); }
     if (!res.product) throw notFound();
     return res;
   },
@@ -55,6 +58,7 @@ export const Route = createFileRoute("/product/$slug")({
       <Button asChild className="mt-6"><Link to="/search">Browse products</Link></Button>
     </div>
   ),
+  errorComponent: RetryError,
   component: ProductPage,
 });
 
@@ -78,6 +82,13 @@ function ProductPage() {
     if (ref) storeReferral(ref, product.id);
     setActive(0);
   }, [product.id, ref]);
+
+  const [paused, setPaused] = useState(false);
+  useEffect(() => {
+    if (images.length < 2 || paused) return;
+    const t = setInterval(() => setActive((i) => (i + 1) % images.length), 3500);
+    return () => clearInterval(t);
+  }, [images.length, paused]);
 
   const { data: related = [] } = useQuery({
     queryKey: ["related", product.id],
@@ -111,13 +122,13 @@ function ProductPage() {
 
       <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
         <div>
-          <div className="aspect-square overflow-hidden rounded-2xl border bg-muted">
-            {images[active] ? <img src={cldUrl(images[active].url, { width: 900, aspectRatio: "1:1" })} srcSet={cldSrcSet(images[active].url, [480, 720, 900, 1200], { aspectRatio: "1:1" })} sizes="(min-width: 1024px) 50vw, 100vw" alt={product.name} className="size-full object-cover" /> : <div className="grid size-full place-items-center text-muted-foreground"><Package className="size-10" /></div>}
+          <div className="relative aspect-square overflow-hidden rounded-2xl border bg-card" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} onTouchStart={() => setPaused(true)}>
+            {images.length ? images.map((im, i) => <img key={im.url + i} src={cldUrl(im.url, { width: 1200 })} srcSet={cldSrcSet(im.url, [480, 720, 900, 1200])} sizes="(min-width: 1024px) 50vw, 100vw" alt={i === active ? product.name : ""} loading={i === 0 ? "eager" : "lazy"} className={cn("absolute inset-0 size-full object-contain transition-opacity duration-700", i === active ? "opacity-100" : "opacity-0")} />) : <div className="grid size-full place-items-center text-muted-foreground"><Package className="size-10" /></div>}
           </div>
           {images.length > 1 && (
             <div className="mt-3 flex gap-2 overflow-x-auto">
               {images.map((im, i) => (
-                <button key={im.url + i} type="button" onClick={() => setActive(i)} aria-label={`Photo ${i + 1}`}
+                <button key={im.url + i} type="button" onClick={() => { setActive(i); setPaused(true); }} aria-label={`Photo ${i + 1}`}
                   className={cn("size-20 shrink-0 overflow-hidden rounded-lg border-2", i === active ? "border-primary" : "border-transparent")}>
                   <img src={cldUrl(im.url, { width: 160, aspectRatio: "1:1" })} alt="" loading="lazy" className="size-full object-cover" />
                 </button>
@@ -163,7 +174,7 @@ function ProductPage() {
 
           <div className="mt-6 grid gap-3 rounded-xl border bg-card p-4 text-sm">
             <Link to="/shop/$slug" params={{ slug: product.shop.slug }} className="flex items-center gap-3">
-              <span className="grid size-10 place-items-center rounded-lg bg-ink font-display font-bold text-ink-foreground">{product.shop.name.slice(0, 1)}</span>
+              <span className="grid size-10 place-items-center overflow-hidden rounded-lg bg-ink font-display font-bold text-ink-foreground">{product.shop.logo_url ? <img src={cldUrl(product.shop.logo_url, { width: 80, aspectRatio: "1:1" })} alt="" className="size-full object-cover" /> : product.shop.name.slice(0, 1)}</span>
               <span>
                 <span className="flex items-center gap-1 font-semibold">{product.shop.name}{!product.shop.is_demo && <BadgeCheck className="size-4 text-success" />}</span>
                 <span className="text-xs text-muted-foreground">{product.shop.is_demo ? "Sample shop" : "Approved seller"}</span>
