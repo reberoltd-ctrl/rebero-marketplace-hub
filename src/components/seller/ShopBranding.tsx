@@ -17,7 +17,7 @@ export function ShopBranding({ shopId, name, logoUrl, coverUrl }: { shopId: stri
     setProgress({ field, pct: 0 });
     try {
       const res = await uploadToCloudinary(file, { folder: "rebero/shops", onProgress: (pct) => setProgress({ field, pct }) });
-      const { error } = await supabase.from("shops").update({ [field]: res.secure_url }).eq("id", shopId);
+      const { error } = await supabase.from("shops").update(field === "logo_url" ? { logo_url: res.secure_url } : { cover_url: res.secure_url }).eq("id", shopId);
       if (error) throw error;
       toast.success(field === "logo_url" ? "Profile photo updated" : "Banner updated");
       void qc.invalidateQueries({ queryKey: ["my-shop"] });
