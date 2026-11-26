@@ -20,6 +20,7 @@ export const Route = createFileRoute("/")({
     meta: [
       { title: "REBERO — Electronics Marketplace in Kigali, Rwanda" },
       { name: "description", content: "Buy new, refurbished and used phones, laptops, TVs and accessories from trusted Kigali electronics shops. Prices in RWF." },
+      { name: "google-site-verification", content: "google775e0be72f500260" },
       { property: "og:title", content: "REBERO — Your Technology. Your Marketplace." },
       { property: "og:description", content: "Buy and sell electronics across Kigali — new, refurbished and used, from verified shops." },
       { property: "og:type", content: "website" },
