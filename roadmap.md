@@ -1,5 +1,12 @@
 # REBERO Roadmap
 
+## Google SEO and product discovery
+- [ ] Dynamic metadata, real Product/Offer JSON-LD, canonical URLs and breadcrumbs
+- [ ] Public SSR category, brand and shop catalogues; preserve existing product URLs
+- [ ] Router-derived dynamic sitemap, robots and private-page noindex
+- [ ] Original electronics buying guides and real-product comparisons
+- [ ] Validate metadata, structured data, crawlability and mobile pages; document publishing and Search Console steps
+
 ## Stage 1–3 (done)
 - [x] Database: roles, profiles, categories, districts, shops, products, images, wishlists, settings, audit log
 - [x] Sign up / sign in (email + Google), password reset

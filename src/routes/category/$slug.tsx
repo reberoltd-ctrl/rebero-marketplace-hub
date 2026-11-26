@@ -1,42 +1,32 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { SearchView } from "@/components/site/SearchView";
-import { categoriesQuery } from "@/lib/catalog";
+import { RetryError } from "@/components/site/RetryError";
+import { getCategoryPage } from "@/lib/public.functions";
+import { pageHead, breadcrumbs, jsonLd } from "@/lib/seo";
 import { validateSearchParams } from "@/lib/search-params";
 
 export const Route = createFileRoute("/category/$slug")({
   validateSearch: validateSearchParams,
-  head: ({ params }) => {
-    const name = params.slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-    return {
-      meta: [
-        { title: `${name} — REBERO` },
-        { name: "description", content: `Shop ${name.toLowerCase()} from Kigali electronics sellers on REBERO. New, refurbished and used, priced in RWF.` },
-        { property: "og:title", content: `${name} on REBERO` },
-        { property: "og:description", content: `New, refurbished and used ${name.toLowerCase()} from Kigali sellers.` },
-        { property: "og:type", content: "website" },
-        { name: "twitter:card", content: "summary" },
-      ],
-    };
+  loaderDeps: ({ search }) => search,
+  loader: async ({ params, deps }) => {
+    const data = await getCategoryPage({ data: { slug: params.slug, filters: deps } });
+    if (!data.category) throw notFound();
+    return { ...data, category: data.category };
   },
+  head: ({ loaderData, params }) => {
+    const c = loaderData?.category;
+    const path = `/category/${encodeURIComponent(params.slug)}`;
+    if (!c) return pageHead("Category unavailable | REBERO Store", "This category is unavailable.", path, { noindex: true });
+    return { ...pageHead(`${c.name} in Rwanda | New, Used & Refurbished | REBERO Store`, `Browse ${c.name.toLowerCase()} from local electronics sellers in Kigali, Rwanda. Compare new, used and refurbished devices, actual photos and prices in RWF.`, path), scripts: [jsonLd(breadcrumbs([{ name: "Home", path: "/" }, { name: c.name, path }]))] };
+  },
+  errorComponent: RetryError,
+  notFoundComponent: () => <div className="container-page py-16"><h1 className="text-2xl font-bold">Category not found</h1><Link to="/search" className="mt-4 inline-block text-primary">Browse all products</Link></div>,
   component: CategoryPage,
 });
 
 function CategoryPage() {
-  const { slug } = Route.useParams();
+  const { category, products } = Route.useLoaderData();
   const params = Route.useSearch();
   const navigate = useNavigate({ from: "/category/$slug" });
-  const { data: categories, isLoading } = useQuery(categoriesQuery);
-  const category = categories?.find((c) => c.slug === slug);
-
-  if (isLoading) return <div className="container-page py-16 text-sm text-muted-foreground">Loading…</div>;
-  if (!category) {
-    return (
-      <div className="container-page py-16 text-center">
-        <h1 className="text-2xl font-bold">Category not found</h1>
-        <Link to="/search" className="mt-4 inline-block text-primary">Browse all products</Link>
-      </div>
-    );
-  }
-  return <SearchView params={params} title={category.name} lockedCategoryId={category.id} onChange={(next) => void navigate({ search: next })} />;
+  return <><nav aria-label="Breadcrumb" className="container-page pt-6 text-sm text-muted-foreground"><Link to="/" className="hover:text-primary">Home</Link> / <span aria-current="page">{category.name}</span></nav><SearchView params={params} title={category.name} lockedCategoryId={category.id} initialProducts={products} onChange={(next) => void navigate({ search: next })} /></>;
 }

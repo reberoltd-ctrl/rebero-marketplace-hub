@@ -1,3 +1,7 @@
+import { pageHead, jsonLd, organization, SITE_URL } from "@/lib/seo";
+import { BRAND_MEDIA } from "@/lib/cloudinary";
+import { getHomePage } from "@/lib/public.functions";
+import { RetryError } from "@/components/site/RetryError";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, BadgeCheck, Link2, Search, ShieldCheck, Store, Truck } from "lucide-react";
@@ -16,17 +20,13 @@ import type { SearchParams } from "@/lib/search-params";
 import { HomeSpotlight } from "@/components/spotlight/HomeSpotlight";
 
 export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "REBERO — Electronics Marketplace in Kigali, Rwanda" },
-      { name: "description", content: "Buy new, refurbished and used phones, laptops, TVs and accessories from trusted Kigali electronics shops. Prices in RWF." },
-      { name: "google-site-verification", content: "google775e0be72f500260" },
-      { property: "og:title", content: "REBERO — Your Technology. Your Marketplace." },
-      { property: "og:description", content: "Buy and sell electronics across Kigali — new, refurbished and used, from verified shops." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
+  loader: () => getHomePage(),
+  errorComponent: RetryError,
+  notFoundComponent: () => <div className="container-page py-16"><h1>Marketplace unavailable</h1></div>,
+  head: ({ loaderData }) => {
+    const head = pageHead("REBERO Store | Buy Phones, Laptops & Electronics in Rwanda", "Shop phones, laptops, TVs, accessories and electronics on REBERO Store in Rwanda. Compare new, used and refurbished devices from local sellers in Kigali.", "/", { image: loaderData?.slides[0]?.image_url ?? BRAND_MEDIA.hero });
+    return { ...head, scripts: [jsonLd(organization), jsonLd({ "@context": "https://schema.org", "@type": "WebSite", "@id": `${SITE_URL}/#website`, name: "REBERO Store", url: SITE_URL, publisher: { "@id": `${SITE_URL}/#organization` } }), jsonLd({ "@context": "https://schema.org", "@type": "WebPage", name: "Buy Electronics in Rwanda with REBERO Store", url: SITE_URL, isPartOf: { "@id": `${SITE_URL}/#website` } })] };
+  },
   component: Home,
 });
 
@@ -50,14 +50,15 @@ function Section({ title, subtitle, to, search, children }: { title: string; sub
 }
 
 function Home() {
+  const initial = Route.useLoaderData();
   const navigate = useNavigate();
   const [q, setQ] = useState("");
   const recentIds = useRecentlyViewed();
   const { user } = useAuth();
-  const { data: categories = [] } = useQuery(categoriesQuery);
-  const { data: products, isLoading } = useQuery({ queryKey: ["home-products"], queryFn: () => fetchProducts({ limit: 60, sort: "newest" }) });
+  const { data: categories = [] } = useQuery({ ...categoriesQuery, initialData: initial.categories });
+  const { data: products, isLoading } = useQuery({ initialData: initial.products, staleTime: 30_000, queryKey: ["home-products"], queryFn: () => fetchProducts({ limit: 60, sort: "newest" }) });
   const { data: shops = [] } = useQuery({
-    queryKey: ["home-shops"],
+    initialData: initial.shops, staleTime: 30_000, queryKey: ["home-shops"],
     queryFn: async () => {
       const { data, error } = await supabase.from("shops").select("id, name, slug, description, is_demo, district:districts(name)").eq("status", "approved").order("approved_at", { ascending: false }).limit(8);
       if (error) throw error;
@@ -87,7 +88,8 @@ function Home() {
   return (
     <div className="pb-4">
       {/* Homepage spotlight: shop slides approved by admins */}
-      <HomeSpotlight />
+      <h1 className="sr-only">Buy Electronics in Rwanda with REBERO Store</h1>
+      <HomeSpotlight initialSlides={initial.slides} />
 
       {/* Categories: slideshow showing 2 at a time on phones, 3 on larger screens */}
       {categories.length > 0 && (

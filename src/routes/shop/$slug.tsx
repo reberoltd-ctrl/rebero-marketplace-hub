@@ -1,34 +1,23 @@
+import { pageHead, breadcrumbs, jsonLd } from "@/lib/seo";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { RetryError } from "@/components/site/RetryError";
-import { useQuery } from "@tanstack/react-query";
 import { BadgeCheck, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ProductGrid, ProductGridSkeleton } from "@/components/site/ProductCard";
+import { ProductGrid } from "@/components/site/ProductCard";
 import { cldUrl } from "@/lib/cloudinary";
-import { supabase } from "@/integrations/supabase/client";
-import { PRODUCT_CARD_SELECT, type CardProduct } from "@/lib/catalog";
 import { getShopPage } from "@/lib/public.functions";
 
 export const Route = createFileRoute("/shop/$slug")({
   loader: async ({ params }) => {
     const res = await getShopPage({ data: { slug: params.slug } });
     if (!res.shop) throw notFound();
-    return res;
+    return { ...res, shop: res.shop };
   },
   head: ({ loaderData }) => {
     const s = loaderData?.shop;
-    const title = s ? `${s.name} — Electronics shop on REBERO` : "Shop — REBERO";
-    const desc = s?.description?.slice(0, 150) || "Electronics shop on REBERO, Kigali.";
-    return {
-      meta: [
-        { title },
-        { name: "description", content: desc },
-        { property: "og:title", content: title },
-        { property: "og:description", content: desc },
-        { property: "og:type", content: "website" },
-        { name: "twitter:card", content: "summary" },
-      ],
-    };
+    if (!s) return pageHead("Shop unavailable | REBERO Store", "This shop is not publicly available.", "/shop/unavailable", { noindex: true });
+    const path = `/shop/${encodeURIComponent(s.slug)}`;
+    return { ...pageHead(`${s.name} | Electronics Seller in Rwanda | REBERO Store`, s.description?.slice(0, 170) || `Shop electronics from ${s.name} in ${s.district?.name ?? "Kigali"}. Compare real listings and prices in RWF.`, path, { noindex: s.is_demo, image: s.cover_url || s.logo_url }), scripts: [jsonLd(breadcrumbs([{ name: "Home", path: "/" }, { name: s.name, path }]))] };
   },
   notFoundComponent: () => (
     <div className="container-page py-20 text-center">
@@ -41,14 +30,8 @@ export const Route = createFileRoute("/shop/$slug")({
 });
 
 function ShopPage() {
-  const { shop } = Route.useLoaderData();
-  const s = shop!;
-  const { data: products, isLoading } = useQuery({
-    queryKey: ["shop-products", s.id],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("products").select(PRODUCT_CARD_SELECT).eq("shop_id", s.id).eq("status", "approved").order("created_at", { ascending: false });
-      if (error) throw error;
-      return (data ?? []) as unknown as CardProduct[];
+  const { shop: s, products } = Route.useLoaderData();
+  return (data ?? []) as unknown as CardProduct[];
     },
   });
   return (
@@ -57,6 +40,7 @@ function ShopPage() {
         {s.cover_url ? <img src={cldUrl(s.cover_url, { width: 1600, height: 400, crop: "fill" })} alt="" className="size-full object-cover" /> : <div className="size-full bg-gradient-to-br from-primary/40 to-ink" />}
       </div>
       <div className="container-page">
+        <nav aria-label="Breadcrumb" className="mt-4 text-sm text-muted-foreground"><Link to="/" className="hover:text-primary">Home</Link> / <span aria-current="page">{s.name}</span></nav>
         <div className="-mt-12 flex flex-col gap-4 md:-mt-16 md:flex-row md:items-end">
           <span className="grid size-24 shrink-0 place-items-center overflow-hidden rounded-2xl border-4 border-background bg-primary font-display text-3xl font-bold text-primary-foreground shadow-lift md:size-32">
             {s.logo_url ? <img src={cldUrl(s.logo_url, { width: 256, aspectRatio: "1:1" })} alt={s.name} className="size-full object-cover" /> : s.name.slice(0, 1)}
@@ -69,7 +53,7 @@ function ShopPage() {
         {s.description && <p className="mt-4 max-w-2xl text-sm text-muted-foreground">{s.description}</p>}
       </div>
       <div className="container-page py-8">
-        {isLoading ? <ProductGridSkeleton /> : <ProductGrid products={products ?? []} empty={<p className="text-sm text-muted-foreground">This shop has no products listed right now.</p>} />}
+        <ProductGrid products={products} empty={<p className="text-sm text-muted-foreground">This shop has no products listed right now.</p>} />
       </div>
     </div>
   );

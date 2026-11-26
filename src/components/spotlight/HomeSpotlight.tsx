@@ -1,3 +1,4 @@
+import type { getHomePage } from "@/lib/public.functions";
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, Megaphone } from "lucide-react";
@@ -12,8 +13,8 @@ import { BRAND_MEDIA, cldSrcSet, cldUrl } from "@/lib/cloudinary";
 const SLIDE = "relative h-[340px] overflow-hidden bg-ink text-ink-foreground md:h-[440px]";
 
 /** Homepage top slideshow of shop spotlights approved by REBERO admins. */
-export function HomeSpotlight() {
-  const { data: slides = [], isLoading } = useQuery(liveSpotlightsQuery);
+export function HomeSpotlight({ initialSlides }: { initialSlides?: Awaited<ReturnType<typeof getHomePage>>["slides"] }) {
+  const { data: slides = [], isLoading } = useQuery({ ...liveSpotlightsQuery, ...(initialSlides ? { initialData: initialSlides } : {}) });
   const { user } = useAuth();
   const [api, setApi] = useState<CarouselApi>();
   const [index, setIndex] = useState(0);

@@ -1,6 +1,6 @@
+import { brandSlug, pageHead, productDescription, productSchema, breadcrumbs, jsonLd } from "@/lib/seo";
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { RetryError } from "@/components/site/RetryError";
-import { useQuery } from "@tanstack/react-query";
 import { BadgeCheck, Heart, MapPin, Package, ShieldCheck, ShoppingCart, Truck, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -10,9 +10,8 @@ import { ProductGrid } from "@/components/site/ProductCard";
 import { ShareButtons } from "@/components/site/ShareButtons";
 import { supabase } from "@/integrations/supabase/client";
 import { cart } from "@/lib/cart";
-import { fetchProducts } from "@/lib/catalog";
 import { cldSrcSet, cldUrl } from "@/lib/cloudinary";
-import { absoluteUrl, CONDITION_LABEL, discountPercent, formatRwf } from "@/lib/format";
+import { CONDITION_LABEL, discountPercent, formatRwf } from "@/lib/format";
 import { getProductPage } from "@/lib/public.functions";
 import { pushRecentlyViewed, storeReferral } from "@/lib/recent";
 import { useWishlist } from "@/lib/wishlist";
@@ -26,29 +25,18 @@ export const Route = createFileRoute("/product/$slug")({
     try { res = await getProductPage({ data: { slug: params.slug } }); }
     catch { res = await getProductPage({ data: { slug: params.slug } }); }
     if (!res.product) throw notFound();
-    return res;
+    return { ...res, product: res.product };
   },
   head: ({ loaderData }) => {
     const p = loaderData?.product;
-    if (!p) return { meta: [{ title: "Product not found — REBERO" }] };
-    const imgs = [...(p.images ?? [])].sort((a, b) => a.sort_order - b.sort_order);
-    const img = imgs[0] ? absoluteUrl(cldUrl(imgs[0].url, { width: 1200, height: 630, crop: "fill", format: "jpg" }), loaderData.origin) : null;
-    const title = `${p.name} — ${formatRwf(p.price_rwf)} | REBERO`;
-    const desc = `${CONDITION_LABEL[p.condition]} · ${formatRwf(p.price_rwf)} · Sold by ${p.shop.name} on REBERO, Kigali.`;
-    const url = loaderData.origin ? `${loaderData.origin}/product/${p.slug}` : undefined;
+    if (!p) return pageHead("Product unavailable | REBERO Store", "This product is not publicly available.", "/product/unavailable", { noindex: true });
+    const path = `/product/${encodeURIComponent(p.slug)}`;
+    const img = [...p.images].sort((a, b) => a.sort_order - b.sort_order)[0]?.url;
+    const head = pageHead(`${p.name} Price in Rwanda | REBERO Store`, productDescription(p), path, { noindex: p.shop.is_demo, image: img ?? null, type: "product" });
     return {
-      meta: [
-        { title },
-        { name: "description", content: desc },
-        { property: "og:title", content: `${p.name} — ${formatRwf(p.price_rwf)}` },
-        { property: "og:description", content: desc },
-        { property: "og:type", content: "product" },
-        ...(url ? [{ property: "og:url", content: url }] : []),
-        ...(img ? [{ property: "og:image", content: img }, { name: "twitter:image", content: img }, { property: "og:image:alt", content: p.name }] : []),
-        { property: "product:price:amount", content: String(p.price_rwf) },
-        { property: "product:price:currency", content: "RWF" },
-        { name: "twitter:card", content: "summary_large_image" },
-      ],
+      ...head,
+      meta: [...head.meta, ...(!p.shop.is_demo ? [{ property: "product:price:amount", content: String(p.price_rwf) }, { property: "product:price:currency", content: "RWF" }] : [])],
+      scripts: [jsonLd(breadcrumbs([{ name: "Home", path: "/" }, ...(p.category ? [{ name: p.category.name, path: `/category/${encodeURIComponent(p.category.slug)}` }] : []), { name: p.name, path }])), ...(!p.shop.is_demo ? [jsonLd(productSchema(p))] : [])],
     };
   },
   notFoundComponent: () => (
@@ -63,14 +51,13 @@ export const Route = createFileRoute("/product/$slug")({
 });
 
 function ProductPage() {
-  const { product: p } = Route.useLoaderData();
+  const { product, related } = Route.useLoaderData();
   const { ref } = Route.useSearch();
   const navigate = useNavigate();
   const { ids, toggle } = useWishlist();
   const [active, setActive] = useState(0);
   const [qty, setQty] = useState(1);
 
-  const product = p!;
   const images = [...(product.images ?? [])].sort((a, b) => a.sort_order - b.sort_order);
   const off = discountPercent(product.price_rwf, product.compare_at_price_rwf);
   const specs = Object.entries((product.specs ?? {}) as Record<string, string>).filter(([k, v]) => k && v);
@@ -90,11 +77,6 @@ function ProductPage() {
     return () => clearInterval(t);
   }, [images.length, paused]);
 
-  const { data: related = [] } = useQuery({
-    queryKey: ["related", product.id],
-    enabled: !!product.category_id,
-    queryFn: async () => (await fetchProducts({ category: product.category_id ?? undefined, limit: 9 })).filter((x) => x.id !== product.id).slice(0, 4),
-  });
 
   const add = (goToCart: boolean) => {
     cart.add({
@@ -112,6 +94,7 @@ function ProductPage() {
         {product.category && (
           <> / <Link to="/category/$slug" params={{ slug: product.category.slug }} className="hover:text-foreground">{product.category.name}</Link></>
         )}
+        <span aria-current="page"> / {product.name}</span>
       </nav>
 
       {product.shop.is_demo && (
@@ -123,7 +106,7 @@ function ProductPage() {
       <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
         <div>
           <div className="relative aspect-square overflow-hidden rounded-2xl border bg-card" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} onTouchStart={() => setPaused(true)}>
-            {images.length ? images.map((im, i) => <img key={im.url + i} src={cldUrl(im.url, { width: 1200 })} srcSet={cldSrcSet(im.url, [480, 720, 900, 1200])} sizes="(min-width: 1024px) 50vw, 100vw" alt={i === active ? product.name : ""} loading={i === 0 ? "eager" : "lazy"} className={cn("absolute inset-0 size-full object-contain transition-opacity duration-700", i === active ? "opacity-100" : "opacity-0")} />) : <div className="grid size-full place-items-center text-muted-foreground"><Package className="size-10" /></div>}
+            {images.length ? images.map((im, i) => <img key={im.url + i} src={cldUrl(im.url, { width: 1200 })} srcSet={cldSrcSet(im.url, [480, 720, 900, 1200])} sizes="(min-width: 1024px) 50vw, 100vw" alt={`${product.name} — ${CONDITION_LABEL[product.condition]} — photo ${i + 1}`} loading={i === 0 ? "eager" : "lazy"} className={cn("absolute inset-0 size-full object-contain transition-opacity duration-700", i === active ? "opacity-100" : "opacity-0")} />) : <div className="grid size-full place-items-center text-muted-foreground"><Package className="size-10" /></div>}
           </div>
           {images.length > 1 && (
             <div className="mt-3 flex gap-2 overflow-x-auto">
@@ -144,7 +127,7 @@ function ProductPage() {
           </div>
           <h1 className="mt-3 text-2xl font-bold md:text-3xl">{product.name}</h1>
           {(product.brand || product.model) && (
-            <p className="mt-1 text-sm text-muted-foreground">{[product.brand, product.model].filter(Boolean).join(" · ")}</p>
+            <p className="mt-1 text-sm text-muted-foreground">{<>{product.brand ? <Link to="/brand/$slug" params={{ slug: brandSlug(product.brand) }} className="hover:text-primary">{product.brand}</Link> : null}{product.brand && product.model ? " · " : ""}{product.model}</>}</p>
           )}
           <div className="mt-5 flex items-baseline gap-3">
             <span className="font-display text-3xl font-extrabold">{formatRwf(product.price_rwf)}</span>

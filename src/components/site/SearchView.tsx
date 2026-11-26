@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ProductGrid, ProductGridSkeleton } from "@/components/site/ProductCard";
-import { categoriesQuery, districtsQuery, fetchProducts } from "@/lib/catalog";
+import { categoriesQuery, districtsQuery, fetchProducts, type CardProduct } from "@/lib/catalog";
 import { CONDITION_LABEL } from "@/lib/format";
 import type { SearchParams, SortKey } from "@/lib/search-params";
 
@@ -17,13 +17,15 @@ type Props = {
   onChange: (next: SearchParams) => void;
   title: string;
   lockedCategoryId?: string;
+  initialProducts?: CardProduct[];
 };
 
-export function SearchView({ params, onChange, title, lockedCategoryId }: Props) {
+export function SearchView({ params, onChange, title, lockedCategoryId, initialProducts }: Props) {
   const categoryId = lockedCategoryId ?? params.category;
   const { data: categories = [] } = useQuery(categoriesQuery);
   const { data: districts = [] } = useQuery(districtsQuery);
   const { data: products, isLoading, isError } = useQuery({
+    ...(initialProducts ? { initialData: initialProducts, staleTime: 30_000 } : {}),
     queryKey: ["search", { ...params, category: categoryId }],
     queryFn: () =>
       fetchProducts({
